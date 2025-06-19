@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { X, User, Lock, Mail } from 'lucide-react';
+import { X, User, Lock, Mail, MessageCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 interface AuthModalProps {
