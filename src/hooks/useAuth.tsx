@@ -1,11 +1,17 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Check if environment variables are set
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Supabase environment variables are missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment.');
+}
+
+export const supabase = supabaseUrl && supabaseKey 
+  ? createClient(supabaseUrl, supabaseKey)
+  : null;
 
 interface User {
   id: string;
@@ -31,6 +37,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    if (!supabase) {
+      console.warn('Supabase client not initialized. Authentication features will not work.');
+      return;
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
@@ -53,6 +64,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const fetchUserProfile = async (userId: string) => {
+    if (!supabase) return;
+    
     try {
       const { data, error } = await supabase
         .from('user_profiles')
@@ -78,6 +91,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const login = async (email: string, password: string) => {
+    if (!supabase) {
+      throw new Error('Supabase not configured. Please check your environment variables.');
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -87,6 +104,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signup = async (name: string, email: string, password: string) => {
+    if (!supabase) {
+      throw new Error('Supabase not configured. Please check your environment variables.');
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -112,6 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
+    if (!supabase) return;
     await supabase.auth.signOut();
   };
 

@@ -29,14 +29,14 @@ export const useChat = (userId: string, isAdmin = false) => {
 
   // Load conversations (for admin)
   useEffect(() => {
-    if (isAdmin) {
+    if (isAdmin && supabase) {
       loadConversations();
     }
   }, [isAdmin]);
 
   // Load messages for specific conversation
   useEffect(() => {
-    if (userId) {
+    if (userId && supabase) {
       const conversationId = isAdmin ? selectedConversationId : `user_${userId}`;
       if (conversationId) {
         loadMessages(conversationId);
@@ -46,6 +46,8 @@ export const useChat = (userId: string, isAdmin = false) => {
   }, [userId, selectedConversationId, isAdmin]);
 
   const loadConversations = async () => {
+    if (!supabase) return;
+    
     try {
       const { data, error } = await supabase
         .from('conversations')
@@ -74,6 +76,8 @@ export const useChat = (userId: string, isAdmin = false) => {
   };
 
   const loadMessages = async (conversationId: string) => {
+    if (!supabase) return;
+    
     try {
       const { data, error } = await supabase
         .from('messages')
@@ -89,6 +93,8 @@ export const useChat = (userId: string, isAdmin = false) => {
   };
 
   const subscribeToMessages = (conversationId: string) => {
+    if (!supabase) return () => {};
+    
     const subscription = supabase
       .channel(`messages:${conversationId}`)
       .on(
@@ -111,7 +117,7 @@ export const useChat = (userId: string, isAdmin = false) => {
   };
 
   const sendMessage = async (content: string, recipientId?: string) => {
-    if (!userId || !content.trim()) return;
+    if (!userId || !content.trim() || !supabase) return;
 
     setLoading(true);
     
@@ -161,6 +167,8 @@ export const useChat = (userId: string, isAdmin = false) => {
   };
 
   const ensureConversation = async (conversationId: string, targetUserId: string) => {
+    if (!supabase) return;
+    
     const { error } = await supabase
       .from('conversations')
       .upsert({
@@ -179,6 +187,8 @@ export const useChat = (userId: string, isAdmin = false) => {
   };
 
   const markAsRead = async (conversationId: string) => {
+    if (!supabase) return;
+    
     await supabase
       .from('conversations')
       .update({ unread_count: 0 })
