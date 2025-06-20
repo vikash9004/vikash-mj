@@ -73,18 +73,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose, user }) => {
               </div>
             )}
             
-            {messages.map((msg, index) => (
-              <div key={index} className={`flex ${msg.senderId === user?.id ? 'justify-end' : 'justify-start'}`}>
+            {messages.map((msg) => (
+              <div key={msg.id} className={`flex ${msg.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-xs px-4 py-2 rounded-2xl ${
-                  msg.senderId === user?.id 
+                  msg.sender_id === user?.id 
                     ? 'bg-green-500 text-white' 
                     : 'bg-gray-100 text-gray-900'
                 }`}>
                   <p className="text-sm">{msg.content}</p>
                   <p className={`text-xs mt-1 ${
-                    msg.senderId === user?.id ? 'text-green-100' : 'text-gray-500'
+                    msg.sender_id === user?.id ? 'text-green-100' : 'text-gray-500'
                   }`}>
-                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               </div>
