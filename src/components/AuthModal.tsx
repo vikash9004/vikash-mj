@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { X, User, Lock, Mail, MessageCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useToast } from '../hooks/use-toast';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
   });
   const [loading, setLoading] = useState(false);
   const { login, signup } = useAuth();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,13 +28,26 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
     try {
       if (isLogin) {
         await login(formData.email, formData.password);
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully signed in.",
+        });
       } else {
         await signup(formData.name, formData.email, formData.password);
+        toast({
+          title: "Account created!",
+          description: "Please check your email to verify your account.",
+        });
       }
       onSuccess();
       setFormData({ name: '', email: '', password: '' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Auth error:', error);
+      toast({
+        title: "Authentication Error",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
